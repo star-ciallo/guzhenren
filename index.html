@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/vue@3.5.21/dist/vue.global.prod.js"></script>
+  <script src="https://unpkg.com/axios@1.12.2/dist/axios.min.js"></script>
+  <title>蛊真人</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #ebe6da;
+    }
+
+    #app {
+      font-family: cursive;
+    }
+
+    #title {
+      margin: 12px;
+      font-size: 16px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    #content {
+      background-color: #f5f1e8;
+      white-space: pre-wrap;
+      line-height: 1.5em;
+      border-radius: 7px;
+      padding: 5px 10px;
+    }
+
+    .page {
+      display: flex;
+      justify-content: space-around;
+      gap: 20px;
+      margin: 10px;
+    }
+
+    a {
+      color: #795548;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .menu {
+      display: flex;
+      flex-direction: column;
+      padding: 5px 12px;
+    }
+
+    @media (max-width: 768px) {
+      .menu a {
+        padding: 2px;
+        border-bottom: 1px solid #dedede;
+      }
+    }
+
+    @media (min-width: 769px) {
+      #app {
+        margin: 0 5vw;
+        font-size: 18px;
+      }
+
+      #title {
+        margin: 16px;
+        font-size: 20px;
+      }
+
+      #content {
+        padding: 10px 20px;
+      }
+
+      .menu {
+        gap: 7px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <div v-if="showPage">
+      <div id="title">{{titleRef}}</div>
+      <div id="content">{{contentRef}}</div>
+      <div class="page">
+        <a :href="pageHash(-1)">上一章</a>
+        <a :href="menuHash()">目录</a>
+        <a :href="pageHash(1)">下一章</a>
+      </div>
+    </div>
+    <div v-else>
+      <div class="menu">
+         <a v-for="(item, index) in menuList" :key="index" :href="'#' + item.index">{{item.title}}</a>
+      </div>
+      <div class="page">
+        <a :href="menuHash(-1)">上一页</a>
+        <a :href="menuHash(0)">主页</a>
+        <a href="https://qm.qq.com/q/CcmCTEra8w">书友群</a>
+        <a :href="menuHash(1)">下一页</a>
+      </div>
+    </div>
+  </div>
+</body>
+<script>
+  const { createApp, ref, watch, nextTick } = Vue
+
+  const hashRef = ref(location.hash)
+  const contentRef = ref("")
+  const titleRef = ref("")
+  const menuList = ref([])
+  const showPage = ref(false)
+
+  function getPageIndex() {
+    const match = /\#\d+$/.exec(hashRef.value)
+    if (!match) return 1
+    return Number(match[0].replace("#", ""))
+  }
+
+  function getMenuIndex() {
+    const match = /\#menu\d+$/.exec(hashRef.value)
+    if (!match) return 1
+    return Number(match[0].replace("#menu", ""))
+  }
+
+  function pageHash(diff) {
+    return "#" + (getPageIndex() + diff)
+  }
+
+  function menuHash(diff) {
+    let index = getMenuIndex()
+    if (!diff) {
+      index = Math.ceil(getPageIndex() / 100)
+    } else {
+      index += diff
+    }
+    return "#menu" + index
+  }
+
+  addEventListener('hashchange', async () => {
+    hashRef.value = location.hash
+  })
+
+  watch(hashRef, async () => {
+    const match = /\#\d+$/.exec(hashRef.value)
+    if (match) {
+      const page = getPageIndex()
+      showPage.value = true
+      const url = `data/${page}.json`
+      const res = await axios.get(url)
+      contentRef.value = res.data.content
+      titleRef.value = res.data.title
+    } else {
+      const page = getMenuIndex()
+      showPage.value = false
+      const url = `menu/${page}.json`
+      const res = await axios.get(url)
+      menuList.value = res.data
+    }
+    nextTick(() => {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+      });
+    })
+  }, { immediate: true })
+
+  createApp({
+    setup() {
+      return {
+        contentRef, titleRef, menuList, pageHash,
+        showPage, menuHash
+      }
+    }
+  }).mount('#app')
+</script>
+
+</html>
