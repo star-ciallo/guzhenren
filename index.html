@@ -14,7 +14,7 @@
     }
 
     #app {
-      font-family: cursive;
+      font-family: 'SimHei', '黑体', sans-serif;
     }
 
     #title {
@@ -39,8 +39,16 @@
       margin: 10px;
     }
 
+    .page a {
+      text-align: center;
+      width: 64px;
+      padding: 3px;
+      border-radius: 6px;
+      border: 1px solid #888;
+    }
+
     a {
-      color: #795548;
+      color: black;
       cursor: pointer;
       text-decoration: none;
     }
@@ -49,24 +57,25 @@
       display: flex;
       flex-direction: column;
       padding: 5px 12px;
+      gap: 7px;
     }
 
     @media (max-width: 768px) {
       .menu a {
         padding: 2px;
-        border-bottom: 1px solid #dedede;
+        border-bottom: 1px solid rgba(0, 0, 0, .07);
       }
     }
 
     @media (min-width: 769px) {
       #app {
-        margin: 0 5vw;
+        margin: 0 calc(50vw - 400px);
         font-size: 18px;
       }
 
       #title {
         margin: 16px;
-        font-size: 20px;
+        font-size: 24px;
       }
 
       #content {
@@ -74,7 +83,9 @@
       }
 
       .menu {
-        gap: 7px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
       }
     }
   </style>
